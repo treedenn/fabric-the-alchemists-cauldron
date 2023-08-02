@@ -1,0 +1,10 @@
+{
+    "type": "thealchemistscauldron:water_ingredient",
+    "item": "minecraft:ghast_tear",
+    "effects": [
+      {
+        "type": "minecraft:regeneration",
+        "amount": 0.5
+      }
+    ]
+  }

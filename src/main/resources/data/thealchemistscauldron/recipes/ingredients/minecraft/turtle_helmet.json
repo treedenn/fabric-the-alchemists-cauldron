@@ -1,0 +1,14 @@
+{
+    "type": "thealchemistscauldron:water_ingredient",
+    "item": "minecraft:turtle_helmet",
+    "effects": [
+      {
+        "type": "minecraft:slowness",
+        "amount": 0.5
+      },
+      {
+        "type": "minecraft:resistance",
+        "amount": 0.5
+      }
+    ]
+  }

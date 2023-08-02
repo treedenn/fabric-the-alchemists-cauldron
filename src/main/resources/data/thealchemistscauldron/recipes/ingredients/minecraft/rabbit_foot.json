@@ -1,0 +1,10 @@
+{
+    "type": "thealchemistscauldron:water_ingredient",
+    "item": "minecraft:rabbit_foot",
+    "effects": [
+      {
+        "type": "minecraft:jump_boost",
+        "amount": 0.5
+      }
+    ]
+  }

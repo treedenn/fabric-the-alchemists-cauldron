@@ -1,0 +1,10 @@
+{
+    "type": "thealchemistscauldron:water_ingredient",
+    "item": "minecraft:pufferfish",
+    "effects": [
+      {
+        "type": "minecraft:water_breathing",
+        "amount": 0.5
+      }
+    ]
+  }

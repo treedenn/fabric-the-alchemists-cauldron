@@ -1,0 +1,10 @@
+{
+    "type": "thealchemistscauldron:water_ingredient",
+    "item": "minecraft:phantom_membrane",
+    "effects": [
+      {
+        "type": "minecraft:slow_falling",
+        "amount": 0.5
+      }
+    ]
+  }

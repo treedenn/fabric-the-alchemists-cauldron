@@ -1,0 +1,10 @@
+{
+    "type": "thealchemistscauldron:water_ingredient",
+    "item": "minecraft:glowstone_dust",
+    "effects": [
+      {
+        "type": "minecraft:glowing",
+        "amount": 0.5
+      }
+    ]
+  }

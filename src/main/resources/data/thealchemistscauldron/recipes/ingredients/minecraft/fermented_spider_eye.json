@@ -1,0 +1,10 @@
+{
+    "type": "thealchemistscauldron:water_ingredient",
+    "item": "minecraft:fermented_spider_eye",
+    "effects": [
+      {
+        "type": "minecraft:poison",
+        "amount": 0.5
+      }
+    ]
+  }

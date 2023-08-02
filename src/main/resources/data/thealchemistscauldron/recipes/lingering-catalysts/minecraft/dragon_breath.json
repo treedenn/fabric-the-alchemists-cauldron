@@ -1,0 +1,5 @@
+{
+  "type": "thealchemistscauldron:water_ingredient",
+  "item": "minecraft:dragon_breath",
+  "base_potion": "minecraft:lingering_potion"
+}

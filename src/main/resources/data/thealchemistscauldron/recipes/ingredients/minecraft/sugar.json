@@ -1,0 +1,10 @@
+{
+    "type": "thealchemistscauldron:water_ingredient",
+    "item": "minecraft:sugar",
+    "effects": [
+      {
+        "type": "minecraft:speed",
+        "amount": 0.5
+      }
+    ]
+  }

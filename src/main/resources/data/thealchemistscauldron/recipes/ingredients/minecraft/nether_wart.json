@@ -1,0 +1,10 @@
+{
+    "type": "thealchemistscauldron:water_ingredient",
+    "item": "minecraft:nether_wart",
+    "effects": [
+      {
+        "type": "minecraft:hunger",
+        "amount": 0.2
+      }
+    ]
+  }

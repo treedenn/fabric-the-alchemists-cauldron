@@ -1,0 +1,10 @@
+{
+    "type": "thealchemistscauldron:water_ingredient",
+    "item": "minecraft:glistering_melon_slice",
+    "effects": [
+      {
+        "type": "minecraft:instant_health",
+        "amount": 0.5
+      }
+    ]
+  }

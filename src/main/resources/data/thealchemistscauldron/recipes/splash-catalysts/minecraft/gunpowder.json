@@ -1,0 +1,5 @@
+{
+  "type": "thealchemistscauldron:water_ingredient",
+  "item": "minecraft:gunpowder",
+  "base_potion": "minecraft:splash_potion"
+}

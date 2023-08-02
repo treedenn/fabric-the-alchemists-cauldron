@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "thealchemistscauldron:alchemist_cauldron_empty_block",
+    "thealchemistscauldron:alchemist_cauldron_block"
+  ]
+}

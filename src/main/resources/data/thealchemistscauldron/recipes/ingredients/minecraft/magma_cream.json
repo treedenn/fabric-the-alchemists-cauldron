@@ -1,0 +1,10 @@
+{
+    "type": "thealchemistscauldron:water_ingredient",
+    "item": "minecraft:magma_cream",
+    "effects": [
+      {
+        "type": "minecraft:fire_resistance",
+        "amount": 0.5
+      }
+    ]
+  }

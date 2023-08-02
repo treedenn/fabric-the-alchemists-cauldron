@@ -1,0 +1,10 @@
+{
+    "type": "thealchemistscauldron:water_ingredient",
+    "item": "minecraft:golden_carrot",
+    "effects": [
+      {
+        "type": "minecraft:night_vision",
+        "amount": 0.5
+      }
+    ]
+  }

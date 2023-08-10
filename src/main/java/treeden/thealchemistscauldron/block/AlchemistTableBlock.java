@@ -1,33 +1,36 @@
 package treeden.thealchemistscauldron.block;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.HorizontalFacingBlock;
-import net.minecraft.block.ShapeContext;
+import net.minecraft.block.*;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.DirectionProperty;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockRotation;
+import net.minecraft.util.Hand;
+import net.minecraft.util.function.BooleanBiFunction;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
+import treeden.thealchemistscauldron.entity.AlchemistTableBlockEntity;
 
-public class AlchemistTableBlock extends Block {
+import java.util.Optional;
+import java.util.stream.Stream;
+
+public class AlchemistTableBlock extends BlockWithEntity {
     public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
-
-    private static final VoxelShape BASE = Block.createCuboidShape(0.0, 0.0, 0.0, 2.0, 14.0, 2.0);
-    private static final VoxelShape X_LEG_1 = Block.createCuboidShape(0, 0, 14, 2, 14, 16);
-    private static final VoxelShape X_LEG_2 = Block.createCuboidShape(30, 0, 0, 32, 14, 2);
-    private static final VoxelShape X_LEG_3 = Block.createCuboidShape(30, 0, 14, 32, 14, 16);
-    private static final VoxelShape X_TOP = Block.createCuboidShape(0, 14, 0, 32, 16, 16);
-    private static final VoxelShape Z_LEG_1 = Block.createCuboidShape(14, 0, 0, 16, 14, 2);
-    private static final VoxelShape Z_LEG_2 = Block.createCuboidShape(0, 0, 30, 32, 14, 32);
-    private static final VoxelShape Z_LEG_3 = Block.createCuboidShape(14, 0, 30, 16, 14, 32);
-    private static final VoxelShape Z_TOP = Block.createCuboidShape(0, 14, 0, 16, 16, 32);
-    private static final VoxelShape X_AXIS = VoxelShapes.union(BASE, X_LEG_1, X_LEG_2, X_LEG_3, X_TOP);
-    private static final VoxelShape Z_AXIS = VoxelShapes.union(BASE, Z_LEG_1, Z_LEG_2, Z_LEG_3, Z_TOP);
+    private static final VoxelShape OUTLINE_SHAPE = VoxelShapes.combineAndSimplify(Block.createCuboidShape(0, 14, 0, 16, 16, 16), Stream.of(
+            Block.createCuboidShape(0, 0, 0, 2, 14, 2),
+            Block.createCuboidShape(0, 0, 14, 2, 14, 16),
+            Block.createCuboidShape(14, 0, 14, 16, 14, 16),
+            Block.createCuboidShape(14, 0, 0, 16, 14, 2)
+    ).reduce((v1, v2) -> VoxelShapes.combineAndSimplify(v1, v2, BooleanBiFunction.OR)).get(), BooleanBiFunction.OR);
 
     public AlchemistTableBlock(Settings settings) {
         super(settings);
@@ -35,17 +38,24 @@ public class AlchemistTableBlock extends Block {
     }
 
     @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        return this.getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing().rotateYClockwise());
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        if (!world.isClient) {
+            Optional.ofNullable(state.createScreenHandlerFactory(world, pos))
+                    .ifPresent(player::openHandledScreen);
+        }
+
+        return ActionResult.SUCCESS;
+    }
+
+    @Nullable
+    @Override
+    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+        return new AlchemistTableBlockEntity(pos, state);
     }
 
     @Override
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        Direction direction = state.get(FACING);
-        if (direction.getAxis() == Direction.Axis.X) {
-            return X_AXIS;
-        }
-        return Z_AXIS;
+    public BlockState getPlacementState(ItemPlacementContext ctx) {
+        return this.getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing().rotateYClockwise());
     }
 
     @Override
@@ -56,5 +66,15 @@ public class AlchemistTableBlock extends Block {
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
         builder.add(FACING);
+    }
+
+    @Override
+    public BlockRenderType getRenderType(BlockState state) {
+        return BlockRenderType.MODEL;
+    }
+
+    @Override
+    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+        return OUTLINE_SHAPE;
     }
 }

@@ -7,7 +7,6 @@ import net.minecraft.block.CampfireBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -18,14 +17,8 @@ import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.potion.Potions;
-import net.minecraft.registry.*;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.text.MutableText;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.Text;
-import net.minecraft.text.TextContent;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -35,9 +28,13 @@ import org.jetbrains.annotations.Nullable;
 import treeden.thealchemistscauldron.TheAlchemistsCauldronMod;
 import treeden.thealchemistscauldron.block.AlchemistCauldronBlock;
 import treeden.thealchemistscauldron.inventory.SingleStackInventoryImpl;
+import treeden.thealchemistscauldron.nbt.CauldronNbt;
 import treeden.thealchemistscauldron.recipe.WaterPotionCauldronRecipe;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class AlchemistCauldronBlockEntity extends BlockEntity {
@@ -83,6 +80,15 @@ public class AlchemistCauldronBlockEntity extends BlockEntity {
 
     public void stir(float power) {
         this.mixed = MathHelper.clamp(this.mixed + power, 0f, 1f);
+    }
+
+    public void sampleLiquid(ItemStack itemStack) {
+        if (!itemStack.getItem().equals(TheAlchemistsCauldronMod.LIQUID_DROPPER_ITEM))
+            return;
+
+        NbtCompound nbt = new NbtCompound();
+        CauldronNbt.writeToNbtCompound(nbt, this.mixed, this.temperature, this.duration, this.basePotion, this.effects);
+        itemStack.setNbt(nbt);
     }
 
     public void showClientBoilingParticles(World world, BlockPos pos, BlockState state) {
@@ -168,14 +174,6 @@ public class AlchemistCauldronBlockEntity extends BlockEntity {
             AlchemistCauldronBlock.decreaseFluid(world, pos, state);
         }
 
-        for (PlayerEntity player : world.getPlayers()) {
-            player.sendMessage(MutableText.of(TextContent.EMPTY).append("mixed = " + mixed).formatted(Formatting.GREEN));
-            player.sendMessage(MutableText.of(TextContent.EMPTY).append("biomeTemperature = " + biomeTemperature).formatted(Formatting.BLUE));
-            player.sendMessage(MutableText.of(TextContent.EMPTY).append("blockTemperature = " + blockTemperature).formatted(Formatting.BLUE));
-            player.sendMessage(MutableText.of(TextContent.EMPTY).append("deltaTemperature = " + deltaTemperature).formatted(Formatting.BLUE));
-            player.sendMessage(MutableText.of(TextContent.EMPTY).append("temperature = " + this.temperature).formatted(Formatting.RED));
-        }
-
         world.updateListeners(pos, state, state, Block.NOTIFY_LISTENERS);
     }
 
@@ -207,7 +205,7 @@ public class AlchemistCauldronBlockEntity extends BlockEntity {
     public ItemStack createPotion() {
         List<StatusEffectInstance> statusEffectInstances = this.effects.entrySet().stream()
                 .filter(entry -> entry.getValue() >= 1f)
-                .sorted(Map.Entry.comparingByValue())
+                .sorted(Map.Entry.comparingByValue((o1, o2) -> Float.compare(o2, o1)))
                 .limit(MAX_POTION_EFFECTS)
                 .map(entry -> new StatusEffectInstance(entry.getKey(), 600, entry.getValue().intValue() - 1))
                 .collect(Collectors.toList());
@@ -255,19 +253,7 @@ public class AlchemistCauldronBlockEntity extends BlockEntity {
 
     @Override
     protected void writeNbt(NbtCompound nbt) {
-        nbt.putFloat("mixed", this.mixed);
-        nbt.putFloat("temperature", this.temperature);
-        nbt.putInt("duration", this.duration);
-        nbt.putString("base_potion", Registries.ITEM.getId(this.basePotion).toString());
-        nbt.putInt("potion_effects_size", this.effects.size());
-
-        int count = 0;
-        for (Map.Entry<StatusEffect, Float> entry : this.effects.entrySet()) {
-            nbt.putString("potion_effect_id_" + count, Objects.requireNonNull(Registries.STATUS_EFFECT.getId(entry.getKey())).toString());
-            nbt.putFloat("potion_effect_amount_" + count, entry.getValue());
-            count++;
-        }
-
+        CauldronNbt.writeToNbtCompound(nbt, this.mixed, this.temperature, this.duration, this.basePotion, this.effects);
         super.writeNbt(nbt);
     }
 
@@ -275,14 +261,11 @@ public class AlchemistCauldronBlockEntity extends BlockEntity {
     public void readNbt(NbtCompound nbt) {
         super.readNbt(nbt);
 
-        this.mixed = nbt.getFloat("mixed");
-        this.temperature = nbt.getFloat("temperature");
-        this.duration = nbt.getInt("duration");
-        this.basePotion = Registries.ITEM.get(new Identifier(nbt.getString("base_potion")));
-
-        for (int i = 0; i < nbt.getInt("potion_effects_size"); i++) {
-            this.effects.put(Registries.STATUS_EFFECT.get(new Identifier(nbt.getString("potion_effect_id_" + i))), nbt.getFloat("potion_effect_amount_" + i));
-        }
+        this.mixed = CauldronNbt.getMixed(nbt);
+        this.temperature = CauldronNbt.getTemperature(nbt);
+        this.duration = CauldronNbt.getDuration(nbt);
+        this.basePotion = CauldronNbt.getBasePotion(nbt);
+        this.effects = CauldronNbt.getEffects(nbt);
     }
 
     @Nullable

@@ -53,8 +53,6 @@ public class WaterPotionRecipeSerializer implements RecipeSerializer<WaterPotion
             recipe.setEffects(effects);
         }
 
-        TheAlchemistsCauldronMod.LOGGER.info("LoadedRecipe = {}", recipe);
-
         return recipe;
     }
 

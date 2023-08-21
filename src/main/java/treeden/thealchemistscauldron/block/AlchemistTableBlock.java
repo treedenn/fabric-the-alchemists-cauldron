@@ -4,6 +4,7 @@ import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.item.ItemStack;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.util.ActionResult;
@@ -18,6 +19,7 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import treeden.thealchemistscauldron.TheAlchemistsCauldronMod;
 import treeden.thealchemistscauldron.entity.AlchemistTableBlockEntity;
 
 import java.util.Optional;
@@ -40,8 +42,24 @@ public class AlchemistTableBlock extends BlockWithEntity {
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         if (!world.isClient) {
-            Optional.ofNullable(state.createScreenHandlerFactory(world, pos))
-                    .ifPresent(player::openHandledScreen);
+            Optional<AlchemistTableBlockEntity> entityOptional = world.getBlockEntity(pos, TheAlchemistsCauldronMod.ALCHEMIST_TABLE_BLOCK_ENTITY_TYPE);
+            if (entityOptional.isEmpty())
+                return ActionResult.FAIL;
+
+            AlchemistTableBlockEntity entity = entityOptional.get();
+            ItemStack stackInHand = player.getStackInHand(hand);
+            if (player.isSneaking()) {
+                entity.extract(player.getInventory());
+            } else {
+                if (stackInHand.getItem().equals(TheAlchemistsCauldronMod.LIQUID_DROPPER_ITEM)) {
+                    return entity.canInsert(stackInHand)
+                            ? ActionResult.SUCCESS
+                            : ActionResult.PASS;
+                }
+
+                Optional.ofNullable(state.createScreenHandlerFactory(world, pos))
+                        .ifPresent(player::openHandledScreen);
+            }
         }
 
         return ActionResult.SUCCESS;

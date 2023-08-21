@@ -1,7 +1,9 @@
 package treeden.thealchemistscauldron.block;
 
+import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.LeveledCauldronBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -27,21 +29,23 @@ import static treeden.thealchemistscauldron.TheAlchemistsCauldronMod.ALCHEMIST_C
 public class AlchemistCauldronBlock extends LeveledCauldronBlock implements BlockEntityProvider {
     public static void decreaseFluid(World world, BlockPos pos, BlockState state) {
         int newLevel = state.get(LEVEL) - 1;
-        world.setBlockState(pos, newLevel == 0 ? ALCHEMIST_CAULDRON_EMPTY_BLOCK.getDefaultState() : state.with(LEVEL, newLevel));
+        world.setBlockState(pos, newLevel == 0
+                ? ALCHEMIST_CAULDRON_EMPTY_BLOCK.getDefaultState()
+                : state.with(LEVEL, newLevel));
     }
 
-    public AlchemistCauldronBlock(Settings settings) {
-        super(settings, RAIN_PREDICATE, AlchemistCauldronBehavior.WATER_CAULDRON_BEHAVIOR);
+    public AlchemistCauldronBlock() {
+        super(FabricBlockSettings.copyOf(Blocks.CAULDRON), RAIN_PREDICATE, AlchemistCauldronBehavior.WATER_CAULDRON_BEHAVIOR);
         this.setDefaultState(getDefaultState().with(LEVEL, 1));
     }
 
-    public boolean isEntityInCauldron(BlockState state, BlockPos pos, Entity entity) {
+    public boolean isEntityInCauldron(BlockPos pos, Entity entity) {
         return entity.getY() < pos.getY() + .95d && entity.getBoundingBox().maxY > pos.getY() + 0.25d;
     }
 
     @Override
     public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
-        if (!world.isClient && this.isEntityInCauldron(state, pos, entity)) {
+        if (!world.isClient && this.isEntityInCauldron(pos, entity)) {
             if ((entity instanceof ItemEntity)) {
                 ItemStack itemStack = ((ItemEntity) entity).getStack();
                 world.getBlockEntity(pos, TheAlchemistsCauldronMod.ALCHEMIST_CAULDRON_BLOCK_ENTITY_TYPE).ifPresent(blockEntity -> {
@@ -62,12 +66,11 @@ public class AlchemistCauldronBlock extends LeveledCauldronBlock implements Bloc
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         Optional<AlchemistCauldronBlockEntity> entityOptional = world.getBlockEntity(pos, TheAlchemistsCauldronMod.ALCHEMIST_CAULDRON_BLOCK_ENTITY_TYPE);
-        if (entityOptional.isPresent()) {
+        if (!world.isClient() && entityOptional.isPresent()) {
             if (player.getStackInHand(hand).getItem() == Items.GLASS_BOTTLE) {
                 ItemStack potion = entityOptional.get().createPotion();
 
-                if (player.getInventory().main.stream().noneMatch(ItemStack::isEmpty)) {
-                    // inventory is full
+                if (player.getInventory().main.stream().noneMatch(ItemStack::isEmpty)) { // inventory is full
                     player.dropStack(potion);
                 } else {
                     player.getInventory().insertStack(potion);
@@ -95,9 +98,6 @@ public class AlchemistCauldronBlock extends LeveledCauldronBlock implements Bloc
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
         if (type != TheAlchemistsCauldronMod.ALCHEMIST_CAULDRON_BLOCK_ENTITY_TYPE) return null;
-
-        return (world1, pos, state1, blockEntity) -> {
-            ((AlchemistCauldronBlockEntity) blockEntity).tick(world1, pos, state1);
-        };
+        return (world1, pos, state1, blockEntity) -> ((AlchemistCauldronBlockEntity) blockEntity).tick(world1, pos, state1);
     }
 }

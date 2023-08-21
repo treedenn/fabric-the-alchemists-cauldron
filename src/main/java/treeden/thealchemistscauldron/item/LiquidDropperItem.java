@@ -1,5 +1,6 @@
 package treeden.thealchemistscauldron.item;
 
+import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -10,8 +11,8 @@ import treeden.thealchemistscauldron.entity.AlchemistCauldronBlockEntity;
 
 public class LiquidDropperItem extends Item {
 
-    public LiquidDropperItem(Settings settings) {
-        super(settings);
+    public LiquidDropperItem() {
+        super(new FabricItemSettings().maxCount(1));
     }
 
     @Override

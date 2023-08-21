@@ -20,7 +20,7 @@ import java.util.Map;
 import static treeden.thealchemistscauldron.TheAlchemistsCauldronMod.ALCHEMIST_TABLE_SCREEN_HANDLER_TYPE;
 
 public class AlchemistTableScreenHandler extends ScreenHandler {
-    private final Inventory inventory;
+    private final SimpleInventory inventory;
 
     protected float mixed;
     protected float temperature;
@@ -33,36 +33,34 @@ public class AlchemistTableScreenHandler extends ScreenHandler {
         this(syncId, playerInventory, new SimpleInventory(1));
     }
 
-    public AlchemistTableScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory) {
+    public AlchemistTableScreenHandler(int syncId, PlayerInventory playerInventory, SimpleInventory inventory) {
         super(ALCHEMIST_TABLE_SCREEN_HANDLER_TYPE, syncId);
+
         checkSize(inventory, 1);
         this.inventory = inventory;
         inventory.onOpen(playerInventory.player);
 
         // table slot
-        this.addSlot(new Slot(inventory, 0, 140, 55) {
+        this.addSlot(new Slot(inventory, 0, 168, 14) {
             @Override
             public boolean canInsert(ItemStack stack) {
                 return stack.getItem().equals(TheAlchemistsCauldronMod.LIQUID_DROPPER_ITEM) && stack.getNbt() != null;
-            }
-            @Override
-            public void markDirty() {
-                super.markDirty();
-                onContentChanged(inventory);
             }
         });
 
         // players inventory
         for (int inventoryRow = 0; inventoryRow < 3; ++inventoryRow) {
             for (int column = 0; column < 9; ++column) {
-                this.addSlot(new Slot(playerInventory, 9 + column + inventoryRow * 9, 8 + column * 18, 84 + inventoryRow * 18));
+                this.addSlot(new Slot(playerInventory, 9 + column + inventoryRow * 9, 24 + column * 18, 84 + inventoryRow * 18));
             }
         }
 
         // hotbar
         for (int hotbarRow = 0; hotbarRow < 9; ++hotbarRow) {
-            this.addSlot(new Slot(playerInventory, hotbarRow, 8 + hotbarRow * 18, 142));
+            this.addSlot(new Slot(playerInventory, hotbarRow, 24 + hotbarRow * 18, 142));
         }
+
+        this.inventory.addListener(this::onContentChanged);
     }
 
     public ItemStack getLiquidDropper() {
@@ -104,8 +102,6 @@ public class AlchemistTableScreenHandler extends ScreenHandler {
 
     @Override
     public void onContentChanged(Inventory inventory) {
-        super.onContentChanged(inventory);
-
         if (inventory.size() == 0)
             return;
 
@@ -122,6 +118,8 @@ public class AlchemistTableScreenHandler extends ScreenHandler {
         this.basePotion = CauldronNbt.getBasePotion(nbt);
         this.effects = CauldronNbt.getEffects(nbt);
         this.scrollItems(0.0f);
+
+        super.onContentChanged(inventory);
     }
 
     @Override
@@ -145,10 +143,6 @@ public class AlchemistTableScreenHandler extends ScreenHandler {
             } else {
                 objSlot.markDirty();
             }
-
-            this.getSlot(slot).markDirty();
-
-//            onContentChanged(this.inventory);
         }
 
         return itemStack;

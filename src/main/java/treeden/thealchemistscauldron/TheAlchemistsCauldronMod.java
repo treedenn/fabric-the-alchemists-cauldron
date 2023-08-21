@@ -5,7 +5,6 @@ import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -32,14 +31,14 @@ public class TheAlchemistsCauldronMod implements ModInitializer {
     public static final String MOD_ID = "thealchemistscauldron";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-    public static final Item WOODEN_SPOON_ITEM = new SpoonItem(new FabricItemSettings(), 0.25f);
-    public static final Item IRON_SPOON_ITEM = new SpoonItem(new FabricItemSettings(), 0.3f);
-    public static final Item DIAMOND_SPOON_ITEM = new SpoonItem(new FabricItemSettings(), 0.4f);
+    public static final Item WOODEN_SPOON_ITEM = new SpoonItem(0.25f);
+    public static final Item IRON_SPOON_ITEM = new SpoonItem(0.3f);
+    public static final Item DIAMOND_SPOON_ITEM = new SpoonItem(0.4f);
 
-    public static final Item LIQUID_DROPPER_ITEM = new LiquidDropperItem(new FabricItemSettings().maxCount(1));
+    public static final Item LIQUID_DROPPER_ITEM = new LiquidDropperItem();
 
-    public static final Block ALCHEMIST_CAULDRON_EMPTY_BLOCK = new AlchemistCauldronEmptyBlock(FabricBlockSettings.copyOf(Blocks.CAULDRON).requiresTool());
-    public static final Block ALCHEMIST_CAULDRON_BLOCK = new AlchemistCauldronBlock(FabricBlockSettings.copyOf(Blocks.WATER_CAULDRON).requiresTool());
+    public static final Block ALCHEMIST_CAULDRON_EMPTY_BLOCK = new AlchemistCauldronEmptyBlock();
+    public static final Block ALCHEMIST_CAULDRON_BLOCK = new AlchemistCauldronBlock();
     public static final BlockEntityType<AlchemistCauldronBlockEntity> ALCHEMIST_CAULDRON_BLOCK_ENTITY_TYPE = Registry.register(
             Registries.BLOCK_ENTITY_TYPE,
             new Identifier(MOD_ID, "alchemist_cauldron_block_entity"),
@@ -73,6 +72,7 @@ public class TheAlchemistsCauldronMod implements ModInitializer {
         Registry.register(Registries.ITEM, id("wooden_spoon"), WOODEN_SPOON_ITEM);
         Registry.register(Registries.ITEM, id("iron_spoon"), IRON_SPOON_ITEM);
         Registry.register(Registries.ITEM, id("diamond_spoon"), DIAMOND_SPOON_ITEM);
+
         Registry.register(Registries.ITEM, id("liquid_dropper"), LIQUID_DROPPER_ITEM);
         Registry.register(Registries.ITEM, id("alchemist_table_item"), new BlockItem(ALCHEMIST_TABLE_BLOCK, new FabricItemSettings()));
         Registry.register(Registries.ITEM, id("alchemist_cauldron_empty_item"), new BlockItem(ALCHEMIST_CAULDRON_EMPTY_BLOCK, new FabricItemSettings()));

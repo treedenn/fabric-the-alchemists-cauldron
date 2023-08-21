@@ -1,5 +1,6 @@
 package treeden.thealchemistscauldron.item;
 
+import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemUsageContext;
@@ -9,8 +10,8 @@ import treeden.thealchemistscauldron.entity.AlchemistCauldronBlockEntity;
 public class SpoonItem extends Item {
     protected float stirPower;
 
-    public SpoonItem(Settings settings, float stirPower) {
-        super(settings);
+    public SpoonItem(float stirPower) {
+        super(new FabricItemSettings());
         this.stirPower = stirPower;
     }
 
@@ -22,7 +23,7 @@ public class SpoonItem extends Item {
                 return ActionResult.FAIL;
 
             ((AlchemistCauldronBlockEntity) entity).stir(this.stirPower);
-            context.getPlayer().getItemCooldownManager().set(this, 4);
+            context.getPlayer().getItemCooldownManager().set(this, 10);
             return ActionResult.SUCCESS;
         }
         return super.useOnBlock(context);

@@ -31,6 +31,10 @@ public class WaterPotionRecipeSerializer implements RecipeSerializer<WaterPotion
             throw new JsonSyntaxException("Missing 'item' attribute (id: %s)".formatted(id));
         recipe.setItem(Registries.ITEM.get((new Identifier(json.get("item").getAsString()))));
 
+        if (json.has("duration")) {
+            recipe.setDuration(json.get("duration").getAsInt());
+        }
+
         if (json.has("base_potion")) {
             Identifier identifier = new Identifier(json.get("base_potion").getAsString());
             Item basePotion = Registries.ITEM.get(identifier);

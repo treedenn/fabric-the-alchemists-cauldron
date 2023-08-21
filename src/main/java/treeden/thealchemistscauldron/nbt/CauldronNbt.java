@@ -35,7 +35,7 @@ public interface CauldronNbt {
     }
 
     static float getMixed(NbtCompound nbt) {
-        return nbt.getFloat(TEMPERATURE);
+        return nbt.getFloat(MIXED);
     }
 
     static float getTemperature(NbtCompound nbt) {

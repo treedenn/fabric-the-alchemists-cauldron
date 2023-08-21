@@ -168,10 +168,15 @@ public class AlchemistCauldronBlockEntity extends BlockEntity {
         float blockTemperature = getTemperatureFromUnderneath(world, biomeTemperature);
         float deltaTemperature = calculateTemperature(blockTemperature, biomeTemperature);
         this.temperature = MathHelper.clamp(this.temperature + deltaTemperature, MIN_TEMP, MAX_TEMP);
-        this.mixed = MathHelper.clamp(this.mixed - (this.mixed > 0.15f ? 0.021f : 0.006f), 0f, 1f);
 
-        if (this.temperature > BOIL_TEMP && this.mixed == 0 && Math.random() > .5f) {
-            AlchemistCauldronBlock.decreaseFluid(world, pos, state);
+        if (this.temperature >= BOIL_TEMP) {
+            this.mixed = MathHelper.clamp(this.mixed - (this.mixed > 0.15f ? 0.021f : 0.006f), 0f, 1f);
+
+            if (this.mixed == 0 && Math.random() > .5f) {
+                AlchemistCauldronBlock.decreaseFluid(world, pos, state);
+            }
+        } else {
+            this.mixed = MathHelper.clamp(this.mixed + (.3f - this.mixed) * .1f, 0f, 1f);
         }
 
         world.updateListeners(pos, state, state, Block.NOTIFY_LISTENERS);
@@ -213,7 +218,7 @@ public class AlchemistCauldronBlockEntity extends BlockEntity {
         ItemStack potion = new ItemStack(basePotion);
         PotionUtil.setPotion(potion, Potions.WATER);
         PotionUtil.setCustomPotionEffects(potion, statusEffectInstances);
-        potion.setCustomName(Text.of("Elixir of Dangerous Liquid"));
+        potion.setCustomName(Text.of("Elixir of Dangerous Mixture"));
 
         return potion;
     }
@@ -238,6 +243,7 @@ public class AlchemistCauldronBlockEntity extends BlockEntity {
 
     protected void mergeIngredients(WaterPotionCauldronRecipe recipe, int count) {
         this.temperature -= count * TEMPERATURE_COST_PER_ITEM;
+        this.duration += recipe.getDuration() * count;
         this.basePotion = recipe.getBasePotion() == null ? this.basePotion : recipe.getBasePotion();
 
         for (Map.Entry<StatusEffect, Float> entry : recipe.getEffects().entrySet()) {

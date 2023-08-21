@@ -6,11 +6,9 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.Item;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.MutableText;
-import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -29,6 +27,7 @@ public class AlchemistTableScreen extends HandledScreen<ScreenHandler> {
     public AlchemistTableScreen(ScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
         this.handler = (AlchemistTableScreenHandler) handler;
+        this.backgroundWidth = 208;
     }
 
     @Override
@@ -45,7 +44,7 @@ public class AlchemistTableScreen extends HandledScreen<ScreenHandler> {
         if (this.handler.getLiquidDropper() == null)
             return;
 
-        context.drawTextWrapped(this.textRenderer, StringVisitable.plain(Integer.toString((int) this.handler.temperature)), this.x + 130, this.y + 20, 50,5);
+        drawLiquidData(context);
 
         if (hasScrollbar()) {
             context.drawTexture(TEXTURE, this.x + 115, (int) (this.y + 20 + 35 * this.scrollPosition), 160, 168, 7, 10);
@@ -155,36 +154,47 @@ public class AlchemistTableScreen extends HandledScreen<ScreenHandler> {
         this.scrollPosition = MathHelper.clamp(this.scrollPosition, 0.0f, 1.0f);
     }
 
-    private void drawMixed(DrawContext context, float mixed) {
+    private void drawLiquidData(DrawContext context) {
+        int startX = this.x + 125, startY = this.y + 13;
 
-    }
+        // draw mixed
+        context.drawTexture(TEXTURE, startX, startY, 0, 208, 16, 16);
+        Text mixedText = Text.of((int) (this.handler.mixed * 100) + "%");
+        context.drawTextWrapped(this.textRenderer, mixedText, startX + 16, startY + 4, 20,0);
 
-    private void drawTemperature(DrawContext context, float temperature) {
+        // draw temperature
+        context.drawTexture(TEXTURE, startX, startY += 20, 16, 208, 16, 16);
+        Text temperatureText = Text.of((int) this.handler.temperature + "C");
+        context.drawTextWrapped(this.textRenderer, temperatureText, startX + 16, startY + 4, 25,0);
 
-    }
+        // draw duration
+        context.drawTexture(TEXTURE, startX, startY += 20, 32, 208, 16, 16);
+        Text durationText = Text.of(Integer.toString(this.handler.duration));
+        context.drawTextWrapped(this.textRenderer, durationText, startX + 16, startY + 4, 25,0);
 
-    private void drawDuration(DrawContext context, float duration) {
-
-    }
-
-    private void drawBasePotion(DrawContext context, Item basePotion) {
-
+        // draw base potion
+        String[] potionName = Text.translatable(this.handler.basePotion.getTranslationKey()).getString().split(" ");
+        StringBuilder initials = new StringBuilder(potionName.length);
+        for (String s : potionName) { initials.append(s.charAt(0)); }
+        context.drawTextWrapped(this.textRenderer, Text.of(initials.toString()), this.x + 190, this.y + 18, 20,0);
     }
 
     private void drawStatusEffect(DrawContext context, Map.Entry<StatusEffect, Float> entry, int anchorX, int anchorY) {
         context.drawTexture(TEXTURE, anchorX, anchorY, 0, 166, 106, 19);
         Sprite sprite = MinecraftClient.getInstance().getStatusEffectSpriteManager().getSprite(entry.getKey());
-        context.drawSprite(anchorX+2, anchorY+1, 0, 16, 16, sprite);
+        context.drawSprite(anchorX+1, anchorY+1, 0, 17, 17, sprite);
 
-        float scale = 2/3f;
+        float SCALE = 2 / 3f;
         int textX = (anchorX + 23);
         int textY = (anchorY + 7);
+
         context.getMatrices().push();
         context.getMatrices().translate(textX, textY, 0);
-        context.getMatrices().scale(scale, scale, scale);
+        context.getMatrices().scale(SCALE, SCALE, SCALE);
+
         MutableText seText = Text.translatable(entry.getKey().getTranslationKey())
                 .append(ScreenTexts.SPACE).append(Text.translatable("enchantment.level." + entry.getValue().intValue()));
-        context.drawText(this.textRenderer, seText, 0, 0, 0xfab9ef, false);
+        context.drawText(this.textRenderer, seText, 0, 0, 0xffffffff, false);
         context.getMatrices().pop();
     }
 }
